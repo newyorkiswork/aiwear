@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* Pure white */
+    --foreground: 0 0% 15%; /* Dark gray for text */
+    --card: 0 0% 100%; /* White cards */
+    --card-foreground: 0 0% 15%;
+    --popover: 0 0% 100%; /* White popovers */
+    --popover-foreground: 0 0% 15%;
+    --primary: 45 100% 51%; /* Gold */
+    --primary-foreground: 0 0% 15%; /* Dark text on gold */
+    --secondary: 0 0% 95%; /* Light silver/gray */
+    --secondary-foreground: 0 0% 25%;
+    --muted: 0 0% 96%; /* Very light silver */
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 90%; /* Silver accent */
+    --accent-foreground: 0 0% 25%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 85%; /* Light silver border */
+    --input: 0 0% 95%; /* Light silver input */
+    --ring: 45 100% 51%; /* Gold ring */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 8%; /* Dark silver */
+    --foreground: 0 0% 95%; /* Light text */
+    --card: 0 0% 12%; /* Darker silver cards */
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 12%; /* Darker silver popovers */
+    --popover-foreground: 0 0% 95%;
+    --primary: 45 100% 51%; /* Gold stays the same */
+    --primary-foreground: 0 0% 8%; /* Dark text on gold */
+    --secondary: 0 0% 20%; /* Medium silver */
+    --secondary-foreground: 0 0% 90%;
+    --muted: 0 0% 15%; /* Darker silver */
+    --muted-foreground: 0 0% 70%;
+    --accent: 0 0% 25%; /* Medium silver accent */
+    --accent-foreground: 0 0% 90%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%; /* Medium silver border */
+    --input: 0 0% 15%; /* Darker silver input */
+    --ring: 45 100% 51%; /* Gold ring */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Gold gradient backgrounds */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 50%, #FCD34D 100%);
+  }
+  
+  .bg-gold-gradient-subtle {
+    background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  }
+  
+  /* Silver gradient backgrounds */
+  .bg-silver-gradient {
+    background: linear-gradient(135deg, #64748B 0%, #94A3B8 50%, #CBD5E1 100%);
+  }
+  
+  .bg-silver-gradient-subtle {
+    background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  }
+  
+  /* Gold and silver borders */
+  .border-gold {
+    border-color: #F59E0B;
+  }
+  
+  .border-silver {
+    border-color: #64748B;
+  }
+  
+  /* Gold and silver text */
+  .text-gold {
+    color: #F59E0B;
+  }
+  
+  .text-silver {
+    color: #64748B;
+  }
+  
+  /* Hover effects */
+  .hover-gold:hover {
+    color: #F59E0B;
+  }
+  
+  .hover-silver:hover {
+    color: #64748B;
+  }
+  
+  /* Category image enhancements */
+  .category-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+}
