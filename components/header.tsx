@@ -38,10 +38,6 @@ export default function Header() {
             <Link href="/" className="text-sm font-medium transition-colors hover:text-gold">
               {t('nav.home')}
             </Link>
-            <Link href="/shop" className="text-sm font-medium transition-colors hover:text-gold">
-              {t('nav.shop')}
-            </Link>
-
           </nav>
         </div>
         <div className="flex items-center gap-4">
@@ -79,7 +75,7 @@ export default function Header() {
             <Link href="/cart">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
-                <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-gold text-black font-bold">
+                <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-gold-500 text-black font-bold">
                   {cartCount}
                 </Badge>
               )}
