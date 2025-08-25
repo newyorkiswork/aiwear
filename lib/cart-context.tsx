@@ -33,7 +33,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     console.log('CartContext: Adding item to cart:', newItem)
     
     setItems(prevItems => {
-      // Check if item already exists with same size and color
+      // Check if item already exists with same slug, size, and color
       const existingItemIndex = prevItems.findIndex(
         item => 
           item.slug === newItem.slug && 
@@ -51,7 +51,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         // Add new item with unique ID
         const newCartItem: CartItem = {
           ...newItem,
-          id: Date.now() // Simple unique ID generation
+          id: Date.now() + Math.floor(Math.random() * 1000) // More unique ID generation
         }
         console.log('CartContext: Added new item:', newCartItem)
         return [...prevItems, newCartItem]

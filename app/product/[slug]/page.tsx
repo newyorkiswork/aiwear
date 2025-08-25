@@ -4,157 +4,17 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { Minus, Plus, Heart, ShoppingCart, Star, Truck, Shield, RotateCcw, CheckCircle } from "lucide-react"
+import { Minus, Plus, Heart, ShoppingCart, Star, Truck, Shield, RotateCcw, CheckCircle, CreditCard, QrCode } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { useLanguage } from "@/lib/language-context"
 import { useCart } from "@/lib/cart-context"
-
-// Product data - in a real app this would come from an API or database
-const products = [
-  {
-    id: 1,
-    name: "AI Runs On Tokens Shirt",
-    image: "/shirts.png",
-    price: 19.99,
-    offerPrice: 19.99,
-    category: "Shirts",
-    brand: "A.I Wear",
-    rating: 4.5,
-    slug: "ai-runs-on-tokens-shirt",
-    description: "Premium quality shirt featuring the iconic 'AI Runs On Tokens' design. Made from 100% cotton for maximum comfort and style.",
-    features: [
-      "100% Premium Cotton",
-      "Comfortable fit",
-      "Machine washable",
-      "Available in multiple sizes"
-    ],
-         sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-     colors: ["White", "Black", "Navy", "Dark Green", "Gray"]
-  },
-  {
-    id: 2,
-    name: "AI Runs On Tokens Crewneck",
-    image: "/crewnecks.png",
-    price: 29.99,
-    offerPrice: 29.99,
-    category: "Crewnecks",
-    brand: "A.I Wear",
-    rating: 4.8,
-    slug: "ai-runs-on-tokens-crewneck",
-    description: "Stylish crewneck sweatshirt with the signature 'AI Runs On Tokens' graphic. Perfect for casual wear and tech enthusiasts.",
-    features: [
-      "Premium cotton blend",
-      "Ribbed cuffs and hem",
-      "Comfortable fit",
-      "Machine washable"
-    ],
-         sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-     colors: ["White", "Black", "Navy", "Dark Green", "Gray"]
-  },
-  {
-    id: 3,
-    name: "AI Runs On Tokens Hoodie",
-    image: "/hoodies.png",
-    price: 39.99,
-    offerPrice: 39.99,
-    category: "Hoodies",
-    brand: "A.I Wear",
-    rating: 4.7,
-    slug: "ai-runs-on-tokens-hoodie",
-    description: "Comfortable hoodie featuring the 'AI Runs On Tokens' design. Perfect for layering and casual wear.",
-    features: [
-      "Fleece-lined hood",
-      "Kangaroo pocket",
-      "Drawstring closure",
-      "Machine washable"
-    ],
-         sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-     colors: ["White", "Black", "Navy", "Dark Green", "Gray"]
-  },
-  {
-    id: 4,
-    name: "AI Runs On Tokens Sweatpants",
-    image: "/sweatpants.png",
-    price: 34.99,
-    offerPrice: 34.99,
-    category: "Sweatpants",
-    brand: "A.I Wear",
-    rating: 4.6,
-    slug: "ai-runs-on-tokens-sweatpants",
-    description: "Comfortable sweatpants with the 'AI Runs On Tokens' design. Perfect for lounging and casual wear.",
-    features: [
-      "Elastic waistband",
-      "Drawstring closure",
-      "Side pockets",
-      "Machine washable"
-    ],
-         sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-     colors: ["White", "Black", "Navy", "Dark Green", "Gray"]
-  },
-  {
-    id: 5,
-    name: "AI Runs On Tokens Socks",
-    image: "/socks.png",
-    price: 14.99,
-    offerPrice: 14.99,
-    category: "Socks",
-    brand: "A.I Wear",
-    rating: 4.4,
-    slug: "ai-runs-on-tokens-socks",
-    description: "Comfortable socks featuring the 'AI Runs On Tokens' design. Perfect for everyday wear.",
-    features: [
-      "Cotton blend",
-      "Cushioned sole",
-      "Elastic arch support",
-      "Machine washable"
-    ],
-         sizes: ["S", "M", "L"],
-     colors: ["White", "Black", "Navy", "Dark Green", "Gray"]
-  },
-  {
-    id: 6,
-    name: "AI Runs On Tokens Bucket Hat",
-    image: "/bucket hats.png",
-    price: 29.99,
-    offerPrice: 29.99,
-    category: "Bucket Hats",
-    brand: "A.I Wear",
-    rating: 4.3,
-    slug: "ai-runs-on-tokens-bucket-hat",
-    description: "Stylish bucket hat with the 'AI Runs On Tokens' design. Perfect for sun protection and casual wear.",
-    features: [
-      "100% Cotton",
-      "Adjustable fit",
-      "Sun protection",
-      "Hand washable"
-    ],
-         sizes: ["One Size"],
-     colors: ["White", "Black", "Navy", "Dark Green", "Gray"]
-   },
-   {
-     id: 7,
-     name: "AI Runs On Tokens Snapback",
-    image: "/snapbacks.png",
-    price: 29.99,
-    offerPrice: 29.99,
-    category: "Snapbacks",
-    brand: "A.I Wear",
-    rating: 4.5,
-    slug: "ai-runs-on-tokens-snapback",
-    description: "Classic snapback hat featuring the 'AI Runs On Tokens' design. Perfect for casual wear and street style.",
-    features: [
-      "Structured crown",
-      "Snap closure",
-      "Curved brim",
-      "Hand washable"
-    ],
-         sizes: ["One Size"],
-     colors: ["White", "Black", "Navy", "Dark Green", "Gray"]
-  }
-]
+import { getProductBySlug } from "@/lib/product-data"
+import { createOrder, type Order } from "@/lib/order-management"
 
 export default function ProductPage() {
   const { t } = useLanguage()
@@ -162,12 +22,21 @@ export default function ProductPage() {
   const params = useParams()
   const slug = params.slug as string
   
-  const product = products.find(p => p.slug === slug)
+  const product = getProductBySlug(slug)
   
   const [selectedSize, setSelectedSize] = useState(product?.sizes[0] || "")
   const [selectedColor, setSelectedColor] = useState(product?.colors[0] || "")
   const [quantity, setQuantity] = useState(1)
   const [showAddedMessage, setShowAddedMessage] = useState(false)
+  const [showCheckout, setShowCheckout] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<'zelle' | 'cashapp' | null>(null)
+  const [currentOrder, setCurrentOrder] = useState<Order | null>(null)
+  const [customerInfo, setCustomerInfo] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: ''
+  })
 
           if (!product) {
           return (
@@ -176,7 +45,7 @@ export default function ProductPage() {
                 <h1 className="text-2xl font-bold mb-4">{t('product.notFound.title')}</h1>
                 <p className="text-muted-foreground mb-8">{t('product.notFound.description')}</p>
                 <Button asChild>
-                  <Link href="/shop">{t('product.backToShop')}</Link>
+                  <Link href={`/shop/${product.brand}`}>{t('product.backToShop')}</Link>
                 </Button>
               </div>
             </div>
@@ -187,6 +56,7 @@ export default function ProductPage() {
     if (!product) return
     
     console.log('Adding to cart:', {
+      id: product.id,
       name: product.name,
       size: selectedSize,
       color: selectedColor,
@@ -194,6 +64,7 @@ export default function ProductPage() {
     })
     
     addToCart({
+      id: product.id,
       name: product.name,
       image: product.image,
       price: product.price,
@@ -211,6 +82,50 @@ export default function ProductPage() {
     console.log('Cart total items after adding:', getTotalItems())
   }
 
+  const handleCheckout = () => {
+    setShowCheckout(true)
+  }
+
+  const handleCreateOrder = () => {
+    if (!product || !customerInfo.name || !customerInfo.email || !customerInfo.phone || !customerInfo.address) {
+      alert('Please fill in all customer information')
+      return
+    }
+
+    const order = createOrder({
+      customerName: customerInfo.name,
+      customerEmail: customerInfo.email,
+      customerPhone: customerInfo.phone,
+      items: [{
+        id: product.id,
+        name: `${product.name} (${selectedColor})`,
+        size: selectedSize,
+        color: selectedColor,
+        quantity: quantity,
+        price: product.price,
+        image: product.image
+      }],
+      total: product.price * quantity,
+      paymentMethod: paymentMethod!,
+      paymentStatus: 'pending',
+      orderStatus: 'pending',
+      shippingAddress: customerInfo.address
+    })
+
+    setCurrentOrder(order)
+  }
+
+  const handlePaymentMethodSelect = (method: 'zelle' | 'cashapp') => {
+    setPaymentMethod(method)
+  }
+
+  const handlePaymentComplete = () => {
+    // This would typically process the payment and redirect
+    console.log('Payment completed with:', paymentMethod)
+    setShowCheckout(false)
+    setPaymentMethod(null)
+  }
+
   const addToWishlist = () => {
     // This would typically add the item to wishlist
     console.log(`Added ${product.name} to wishlist`)
@@ -225,8 +140,8 @@ export default function ProductPage() {
             {t('nav.home')}
           </Link>
           <span className="mx-2">/</span>
-          <Link href="/shop" className="hover:text-primary">
-            {t('nav.shop')}
+          <Link href={`/shop/${product.brand}`} className="hover:text-primary">
+            AI Runs on {product.brand === 'tokens' ? 'Tokens' : 'Data'}
           </Link>
           <span className="mx-2">/</span>
           <span>{product.name}</span>
@@ -277,12 +192,7 @@ export default function ProductPage() {
               <span className="text-sm text-muted-foreground">({product.rating})</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">${product.offerPrice.toFixed(2)}</span>
-              {product.price !== product.offerPrice && (
-                <span className="text-lg text-muted-foreground line-through">
-                  ${product.price.toFixed(2)}
-                </span>
-              )}
+              <span className="text-2xl font-bold">${product.price.toFixed(2)}</span>
             </div>
           </div>
 
@@ -367,6 +277,17 @@ export default function ProductPage() {
             </Button>
           </div>
 
+          {/* Quick Checkout Button */}
+          <Button 
+            className="w-full" 
+            size="lg"
+            variant="default"
+            onClick={handleCheckout}
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Quick Checkout - ${(product.price * quantity).toFixed(2)}
+          </Button>
+
           {/* Features */}
           <div className="space-y-4">
             <h3 className="font-medium">{t('product.features')}</h3>
@@ -395,6 +316,222 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      {showCheckout && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Checkout</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowCheckout(false)
+                    setPaymentMethod(null)
+                    setCurrentOrder(null)
+                  }}
+                >
+                  ×
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Order Summary */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-medium mb-2">Order Summary</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    width={60}
+                    height={60}
+                    className="rounded-md object-cover"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{product.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Size: {selectedSize} | Color: {selectedColor} | Qty: {quantity}
+                    </p>
+                  </div>
+                  <p className="font-medium">${(product.price * quantity).toFixed(2)}</p>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center pt-2">
+                  <span className="font-medium">Total</span>
+                  <span className="font-bold text-lg">${(product.price * quantity).toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Customer Information Form */}
+              {!currentOrder && (
+                <div className="space-y-4">
+                  <h3 className="font-medium">Customer Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">Full Name *</label>
+                      <Input
+                        value={customerInfo.name}
+                        onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
+                        placeholder="Enter your full name"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Email *</label>
+                      <Input
+                        type="email"
+                        value={customerInfo.email}
+                        onChange={(e) => setCustomerInfo({...customerInfo, email: e.target.value})}
+                        placeholder="Enter your email"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Phone *</label>
+                      <Input
+                        value={customerInfo.phone}
+                        onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
+                        placeholder="Enter your phone number"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Shipping Address *</label>
+                      <Input
+                        value={customerInfo.address}
+                        onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})}
+                        placeholder="Enter your shipping address"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Methods */}
+              {!currentOrder && (
+                <div className="space-y-3">
+                  <h3 className="font-medium">Select Payment Method</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant={paymentMethod === 'zelle' ? "default" : "outline"}
+                      className="h-16 flex-col gap-1"
+                      onClick={() => handlePaymentMethodSelect('zelle')}
+                    >
+                      <Image
+                        src="/zelle-logo.jpg"
+                        alt="Zelle"
+                        width={40}
+                        height={20}
+                        className="object-contain"
+                      />
+                      <span className="text-xs">Zelle</span>
+                    </Button>
+                    <Button
+                      variant={paymentMethod === 'cashapp' ? "default" : "outline"}
+                      className="h-16 flex-col gap-1"
+                      onClick={() => handlePaymentMethodSelect('cashapp')}
+                    >
+                      <Image
+                        src="/cashapp-button.png"
+                        alt="CashApp"
+                        width={40}
+                        height={20}
+                        className="object-contain"
+                      />
+                      <span className="text-xs">CashApp</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Create Pre-Order Button */}
+              {!currentOrder && paymentMethod && (
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={handleCreateOrder}
+                  disabled={!customerInfo.name || !customerInfo.email || !customerInfo.phone || !customerInfo.address}
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Create Pre-Order
+                </Button>
+              )}
+
+              {/* Order Created - Payment Instructions */}
+              {currentOrder && (
+                <div className="space-y-4">
+                  <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+                    <h4 className="font-medium text-green-800 mb-2">✅ Pre-Order Created Successfully!</h4>
+                    <p className="text-sm text-green-700">
+                      Order Number: <strong>{currentOrder.orderNumber}</strong>
+                    </p>
+                    <p className="text-sm text-green-700">
+                      Confirmation Code: <strong className="bg-gold-500 text-white px-2 py-1 rounded">{currentOrder.confirmationCode}</strong>
+                    </p>
+                    <p className="text-sm text-green-700">
+                      A confirmation email has been sent to your email address.
+                    </p>
+                  </div>
+
+                  {/* Payment Instructions */}
+                  <div className="border rounded-lg p-4 bg-muted/50">
+                    <h4 className="font-medium mb-2">
+                      {currentOrder.paymentMethod === 'zelle' ? 'Zelle' : 'CashApp'} Payment Instructions
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      {currentOrder.paymentMethod === 'zelle' ? (
+                        <>
+                          <p>1. Send payment to: <strong>347-806-7290</strong></p>
+                          <p>2. Include this memo: <strong className="bg-yellow-100 px-2 py-1 rounded">{currentOrder.memo}</strong></p>
+                          <p>3. We'll ship your order within 24 hours of payment confirmation</p>
+                        </>
+                      ) : (
+                        <>
+                          <p>1. Send payment to: <strong>$newyorkishome</strong></p>
+                          <p>2. Include this memo: <strong className="bg-yellow-100 px-2 py-1 rounded">{currentOrder.memo}</strong></p>
+                          <p>3. We'll ship your order within 24 hours of payment confirmation</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Payment Links */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => window.open('https://www.zellepay.com/get-started', '_blank')}
+                    >
+                      <QrCode className="h-4 w-4 mr-2" />
+                      Zelle Setup
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => window.open('https://cash.app/$newyorkishome', '_blank')}
+                    >
+                      <QrCode className="h-4 w-4 mr-2" />
+                      CashApp Pay
+                    </Button>
+                  </div>
+
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Your pre-order has been created! Please complete payment using the instructions above. 
+                      You'll receive an email confirmation with tracking information once payment is confirmed.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

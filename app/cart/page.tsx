@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import { useLanguage } from "@/lib/language-context"
 
@@ -55,9 +56,27 @@ export default function CartPage() {
           <p className="text-muted-foreground mb-8">
             {t('cart.empty.description')}
           </p>
-          <Button asChild>
-            <Link href="/shop">{t('cart.continueShopping')}</Link>
-          </Button>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Continue shopping from our brands:</p>
+            <div className="flex gap-4 justify-center">
+              <Button asChild variant="outline">
+                <Link href="/shop/tokens">
+                  <span className="flex items-center gap-2">
+                    <span>🪙</span>
+                    AI Runs on Tokens
+                  </span>
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/shop/data">
+                  <span className="flex items-center gap-2">
+                    <span>📊</span>
+                    AI Runs on Data
+                  </span>
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="grid md:grid-cols-3 gap-8">
@@ -86,7 +105,12 @@ export default function CartPage() {
                             />
                           </div>
                           <div>
-                            <h3 className="font-medium">{item.name}</h3>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-medium">{item.name}</h3>
+                              <Badge variant="outline" className="text-xs">
+                                {item.name.includes('Tokens') ? '🪙 Tokens' : '📊 Data'}
+                              </Badge>
+                            </div>
                             <p className="text-sm text-muted-foreground md:hidden">
                               ${item.price.toFixed(2)}
                             </p>
@@ -150,13 +174,31 @@ export default function CartPage() {
                   </div>
                 ))}
               </div>
-              <div className="flex items-center justify-between bg-muted p-6 rounded-b-lg">
-                <Button variant="outline" asChild>
-                  <Link href="/shop">{t('cart.continueShopping')}</Link>
-                </Button>
-                <Button variant="ghost" onClick={() => clearCart()}>
-                  {t('cart.clearCart')}
-                </Button>
+              <div className="bg-muted p-6 rounded-b-lg space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium">Continue Shopping</h3>
+                  <Button variant="ghost" onClick={() => clearCart()}>
+                    {t('cart.clearCart')}
+                  </Button>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" size="sm" asChild className="flex-1">
+                    <Link href="/shop/tokens">
+                      <span className="flex items-center gap-2">
+                        <span>🪙</span>
+                        Tokens
+                      </span>
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="sm" asChild className="flex-1">
+                    <Link href="/shop/data">
+                      <span className="flex items-center gap-2">
+                        <span>📊</span>
+                        Data
+                      </span>
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -165,6 +207,22 @@ export default function CartPage() {
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4">{t('cart.orderSummary')}</h2>
+                
+                {/* Brand Summary */}
+                <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                  <h3 className="text-sm font-medium">Items by Brand</h3>
+                  <div className="flex justify-between text-sm">
+                    <span className="flex items-center gap-1">
+                      <span>🪙</span>
+                      Tokens: {cartItems.filter(item => item.name.includes('Tokens')).reduce((sum, item) => sum + item.quantity, 0)} items
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span>📊</span>
+                      Data: {cartItems.filter(item => item.name.includes('Data')).reduce((sum, item) => sum + item.quantity, 0)} items
+                    </span>
+                  </div>
+                </div>
+                
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">{t('cart.subtotal.label')}</span>

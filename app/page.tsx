@@ -25,81 +25,75 @@ export default function HomePage() {
       {/* Hero Banner */}
       <section className="relative">
         <div className="container px-4 py-12 md:px-6 md:py-24 lg:py-32">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-            <div className="space-y-4">
+          <div className="space-y-8">
+            {/* Hero Text */}
+            <div className="text-center space-y-4">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
                 {t('hero.title')}
               </h1>
-              <p className="max-w-[600px] text-muted-foreground md:text-xl">
+              <p className="max-w-[600px] mx-auto text-muted-foreground md:text-xl">
                 Where technology meets fashion. Cutting-edge style for the modern digital age.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="font-medium bg-gold hover:bg-gold-600 text-white border-gold" asChild>
-                  <Link href="/shop">{t('hero.shopNow')}</Link>
+              <div className="flex justify-center">
+                <Button size="lg" className="font-medium bg-gold-500 hover:bg-gold-600 text-white border-gold-500" asChild>
+                  <Link href="/shop/tokens">{t('hero.shopNow')}</Link>
                 </Button>
               </div>
             </div>
-            <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] rounded-xl overflow-hidden">
-              <Image
-                src="/hero-image.png"
-                alt="A.I Wear Fashion Collection"
-                fill
-                className="object-cover"
-                priority
-              />
+            
+            {/* Hero Images - Split Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+              {/* AI Runs on Tokens */}
+              <div className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-lg group">
+                <Image
+                  src="/hero-1.png"
+                  alt="AI Runs on Tokens - Fashion Collection"
+                  fill
+                  className="object-cover object-center transition-transform group-hover:scale-105"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 className="text-2xl font-bold text-white mb-4">AI Runs on Tokens</h3>
+                  <Button 
+                    size="lg" 
+                    className="font-medium bg-gold-500 hover:bg-gold-600 text-white border-gold-500 shadow-lg" 
+                    asChild
+                  >
+                    <Link href="/shop/tokens">Shop Now</Link>
+                  </Button>
+                </div>
+              </div>
+              
+              {/* AI Runs on Data */}
+              <div className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-lg group">
+                <Image
+                  src="/hero-2.png"
+                  alt="AI Runs on Data - Fashion Collection"
+                  fill
+                  className="object-cover object-center transition-transform group-hover:scale-105"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 className="text-2xl font-bold text-white mb-4">AI Runs on Data</h3>
+                  <Button 
+                    size="lg" 
+                    className="font-medium bg-gold-500 hover:bg-gold-600 text-white border-gold-500 shadow-lg" 
+                    asChild
+                  >
+                    <Link href="/shop/data">Shop Now</Link>
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Product Categories */}
-      <section className="bg-silver-gradient-subtle py-12 md:py-16">
-        <div className="container px-4 md:px-6">
-          <h2 className="text-2xl font-bold tracking-tight text-center mb-8 md:text-3xl">{t('categories.title')}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 justify-items-center">
-            {[
-              { key: 'shirts', label: t('category.shirts') },
-              { key: 'crewnecks', label: t('category.crewnecks') },
-              { key: 'hoodies', label: t('category.hoodies') },
-              { key: 'sweatpants', label: t('category.sweatpants') },
-              { key: 'socks', label: t('category.socks') },
-              { key: 'bucketHats', label: t('category.bucketHats') },
-              { key: 'snapbacks', label: t('category.snapbacks') }
-            ].map((category, index) => {
-              const categoryImages = [
-                "/shirts.png", // Shirts
-                "/crewnecks.png", // Crewnecks
-                "/hoodies.png", // Hoodies
-                "/sweatpants.png", // Sweatpants
-                "/socks.png", // Socks
-                "/bucket hats.png", // Bucket Hats
-                "/snapbacks.png", // Snapbacks
-              ]
-              return (
-                <Link
-                  key={category.key}
-                  href="/shop"
-                  className="group relative overflow-hidden rounded-lg bg-background shadow-md transition-all hover:shadow-lg aspect-square w-full max-w-[300px]"
-                >
-                  <div className="relative overflow-hidden aspect-square">
-                    <Image
-                      src={categoryImages[index]}
-                      alt={category.label}
-                      fill
-                      className="w-full h-full object-cover object-center transition-transform group-hover:scale-110"
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-0 w-full p-4">
-                      <h3 className="text-lg font-semibold text-white">{category.label}</h3>
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      </section>
+
 
 
 

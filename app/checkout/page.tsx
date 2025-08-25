@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, CreditCard, Shield, Truck, User, MapPin } from "lucide-react"
+import { ArrowLeft, CreditCard, Shield, Truck, User, MapPin, QrCode } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator"
 
 import { useCart } from "@/lib/cart-context"
 import { useLanguage } from "@/lib/language-context"
+import { createOrder } from "@/lib/order-management"
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -23,6 +24,7 @@ export default function CheckoutPage() {
   
   // Customer Information
   const [customerName, setCustomerName] = useState("")
+  const [customerEmail, setCustomerEmail] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
   
   // Delivery Options
@@ -34,6 +36,10 @@ export default function CheckoutPage() {
   const [shippingState, setShippingState] = useState("")
   const [shippingZipCode, setShippingZipCode] = useState("")
   
+  // Payment and Order
+  const [paymentMethod, setPaymentMethod] = useState<'zelle' | 'cashapp' | null>(null)
+  const [currentOrder, setCurrentOrder] = useState<any>(null)
+  
 
 
   const subtotal = getTotalPrice()
@@ -41,25 +47,66 @@ export default function CheckoutPage() {
   const shippingCost = deliveryOption === "ship" ? 15.00 : 0
   const total = subtotal + tax + shippingCost
 
+  const handlePaymentMethodSelect = (method: 'zelle' | 'cashapp') => {
+    setPaymentMethod(method)
+  }
+
+  const handleCreateOrder = () => {
+    console.log('Creating order with:', { customerName, customerEmail, phoneNumber, paymentMethod })
+    
+    if (!customerName || !customerEmail || !phoneNumber || !paymentMethod) {
+      console.log('Missing required fields')
+      return
+    }
+
+    // Prepare shipping address
+    const fullShippingAddress = deliveryOption === "ship" 
+      ? `${shippingAddress}, ${shippingCity}, ${shippingState} ${shippingZipCode}`
+      : "Pickup"
+
+    const orderData = {
+      customerName,
+      customerEmail,
+      customerPhone: phoneNumber,
+      items: cartItems,
+      total,
+      paymentMethod,
+      paymentStatus: 'pending' as const,
+      orderStatus: 'pending' as const,
+      shippingAddress: fullShippingAddress
+    }
+
+    console.log('Order data:', orderData)
+    
+    try {
+      const order = createOrder(orderData)
+      console.log('Order created:', order)
+      setCurrentOrder(order)
+      clearCart() // Clear the cart after successful order creation
+    } catch (error) {
+      console.error('Error creating order:', error)
+    }
+  }
 
 
-  // Redirect if cart is empty
+
+  // Redirect if cart is empty and no order was created
   useEffect(() => {
-    if (cartItems.length === 0) {
+    if (cartItems.length === 0 && !currentOrder) {
       router.push('/cart')
     }
-  }, [cartItems, router])
+  }, [cartItems, router, currentOrder])
 
 
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && !currentOrder) {
     return (
       <div className="container px-4 py-8 md:px-6 md:py-12">
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold mb-4">{t('checkout.empty.title')}</h1>
           <p className="text-muted-foreground mb-8">{t('checkout.empty.description')}</p>
           <Button asChild>
-            <Link href="/shop">{t('checkout.continueShopping')}</Link>
+            <Link href="/shop/tokens">{t('checkout.continueShopping')}</Link>
           </Button>
         </div>
       </div>
@@ -160,6 +207,17 @@ export default function CheckoutPage() {
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Enter your full name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="Enter your email address"
                   required
                 />
               </div>
@@ -267,62 +325,157 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* Payment Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                Payment Method
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Shield className="h-4 w-4" />
-                Secure payment processing
-              </div>
-              
-              <div className="space-y-4">
-                               <div className="space-y-4">
-                 <Button 
-                   onClick={() => window.open('https://enroll.zellepay.com/qr-codes?data=ewogICJuYW1lIiA6ICJKQU1JTExBSCIsCiAgInRva2VuIiA6ICJqYW1pbGxhaGMyQGdtYWlsLmNvbSIsCiAgImFjdGlvbiIgOiAicGF5bWVudCIKfQ==', '_blank')}
-                   className="w-full h-16 p-4 bg-white border-2 border-gray-200 hover:border-gray-300 transition-colors"
-                   variant="outline"
-                 >
-                   <Image
-                     src="/zelle-logo.jpg"
-                     alt="Pay with Zelle"
-                     width={120}
-                     height={60}
-                     className="h-12 w-auto mx-auto"
-                   />
-                 </Button>
-                 
-                 <Button 
-                   onClick={() => window.open('https://cash.app/$jkkcorley', '_blank')}
-                   className="w-full h-16 p-4 bg-white border-2 border-gray-200 hover:border-gray-300 transition-colors"
-                   variant="outline"
-                 >
-                   <Image
-                     src="/cashapp-button.png"
-                     alt="Pay with Cash App"
-                     width={120}
-                     height={60}
-                     className="h-12 w-auto mx-auto"
-                   />
-                 </Button>
-                 
-                 <div className="text-center text-sm text-muted-foreground">
-                   <p>Click either button to complete your payment of <strong>${total.toFixed(2)}</strong></p>
-                   <p className="mt-2">After payment, please contact us with your order details</p>
-                 </div>
-               </div>
-                
-                <p className="text-xs text-muted-foreground text-center">
-                  By clicking Pay, you agree to our terms of service
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Payment Methods */}
+          {!currentOrder && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Select Payment Method
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant={paymentMethod === 'zelle' ? "default" : "outline"}
+                    className="h-16 flex-col gap-1"
+                    onClick={() => handlePaymentMethodSelect('zelle')}
+                  >
+                    <Image
+                      src="/zelle-logo.jpg"
+                      alt="Zelle"
+                      width={40}
+                      height={20}
+                      className="object-contain"
+                    />
+                    <span className="text-xs">Zelle</span>
+                  </Button>
+                  <Button
+                    variant={paymentMethod === 'cashapp' ? "default" : "outline"}
+                    className="h-16 flex-col gap-1"
+                    onClick={() => handlePaymentMethodSelect('cashapp')}
+                  >
+                    <Image
+                      src="/cashapp-button.png"
+                      alt="CashApp"
+                      width={40}
+                      height={20}
+                      className="object-contain"
+                    />
+                    <span className="text-xs">CashApp</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Create Pre-Order Button */}
+          {!currentOrder && paymentMethod && (
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={handleCreateOrder}
+              disabled={!customerName || !customerEmail || !phoneNumber || (deliveryOption === "ship" && (!shippingAddress || !shippingCity || !shippingState || !shippingZipCode))}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Create Pre-Order
+            </Button>
+          )}
+
+          {/* Order Created - Payment Instructions */}
+          {currentOrder && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Payment Instructions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+                  <h4 className="font-medium text-green-800 mb-2">✅ Pre-Order Created Successfully!</h4>
+                  <p className="text-sm text-green-700">
+                    Order Number: <strong>{currentOrder.orderNumber}</strong>
+                  </p>
+                  <p className="text-sm text-green-700">
+                    Confirmation Code: <strong className="bg-gold-500 text-white px-2 py-1 rounded">{currentOrder.confirmationCode}</strong>
+                  </p>
+                  <p className="text-sm text-green-700">
+                    A confirmation email has been sent to your email address.
+                  </p>
+                </div>
+
+                {/* Payment Instructions */}
+                <div className="border rounded-lg p-4 bg-muted/50">
+                  <h4 className="font-medium mb-2">
+                    {currentOrder.paymentMethod === 'zelle' ? 'Zelle' : 'CashApp'} Payment Instructions
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {currentOrder.paymentMethod === 'zelle' ? (
+                      <>
+                        <p>1. Send payment to: <strong>347-806-7290</strong></p>
+                        <p>2. Include this memo: <strong className="bg-yellow-100 px-2 py-1 rounded">{currentOrder.memo}</strong></p>
+                        <p>3. We'll ship your order within 24 hours of payment confirmation</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>1. Send payment to: <strong>$newyorkishome</strong></p>
+                        <p>2. Include this memo: <strong className="bg-yellow-100 px-2 py-1 rounded">{currentOrder.memo}</strong></p>
+                        <p>3. We'll ship your order within 24 hours of payment confirmation</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Payment Links */}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => window.open('https://www.zellepay.com/get-started', '_blank')}
+                  >
+                    <QrCode className="h-4 w-4 mr-2" />
+                    Zelle Setup
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => window.open('https://cash.app/$newyorkishome', '_blank')}
+                  >
+                    <QrCode className="h-4 w-4 mr-2" />
+                    CashApp Pay
+                  </Button>
+                </div>
+
+                <div className="text-center space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Your pre-order has been created! Please complete payment using the instructions above. 
+                    You'll receive an email confirmation with tracking information once payment is confirmed.
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    <Button variant="outline" asChild>
+                      <Link href="/shop/tokens">
+                        <span className="flex items-center gap-2">
+                          <span>🪙</span>
+                          Shop Tokens
+                        </span>
+                      </Link>
+                    </Button>
+                    <Button variant="outline" asChild>
+                      <Link href="/shop/data">
+                        <span className="flex items-center gap-2">
+                          <span>📊</span>
+                          Shop Data
+                        </span>
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Security Info */}
           <Card>
